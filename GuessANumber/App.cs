@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 
@@ -57,43 +58,68 @@ namespace GuessANumber
             }
         }
 
-        void WriteToFile(string filePath, int score)
+        List<Score> FileToList(string filePath)
         {
-            string fileContain = "";
-            var scoresList = new List<string>();
-            var intScoresList = new List<int>();
+            List<string> list;
+            var scoreList = new List<Score>();
 
-            if (File.Exists(filePath))
+            if (File.ReadAllLines(filePath).Contains("},{"))
             {
-                fileContain = File.ReadAllText(filePath);
+                list = File.ReadAllText(filePath).Split("},{").ToList();
             }
             else
             {
-                File.WriteAllText(filePath, "");
+                list = File.ReadAllText(filePath).Split("}").ToList();
             }
 
-            if (fileContain == "")
+            foreach (var _score in list)
             {
-                scoresList.Add(score.ToString());
-            }
-            else
-            {
-                fileContain += "," + score;
-                Console.WriteLine("file contain:" + fileContain);
-                scoresList = fileContain.Split(",").ToList();
-                scoresList.ForEach(x => Console.WriteLine("score list: " + x));
+                if (_score != "")
+                {
+                    Console.WriteLine(_score.Split(",")[0].Replace("{", ""));
+                    int result = Convert.ToInt32(_score.Split(",")[0].Replace("{", "").Trim());
+                    string name = _score.Split(",")[1];
+                    string time = _score.Split(",")[2];
+                    var scoreObj = new Score(result, name, time);
+                    scoreList.Add(scoreObj);
+                }
             }
 
-            foreach (var element in scoresList) { intScoresList.Add(Convert.ToInt32(element)); }
-            string str = SortArray(intScoresList);
-            File.WriteAllText(filePath, str);
+            return scoreList;
         }
 
-        string SortArray(List<int> list)
+        string ListToFile(List<Score> list)
+        {
+            var stringBuilder = "";
+            for (int i = 0; i < list.Count; i++)
+            {
+                stringBuilder += "{\n   ";
+                stringBuilder += list[i].Result + ",\n   ";
+                stringBuilder += list[i].Name + ",\n   ";
+                stringBuilder += list[i].Time + "\n}";
+
+                if (list.Count > 1 && i + 1 < list.Count) { stringBuilder += ",\n"; }
+            }
+            return stringBuilder;
+        }
+
+        void WriteToFile(string filePath, int score)
+        {
+            var scoresList = new List<Score>();
+
+            if (File.Exists(filePath) && File.ReadAllText(filePath) != "")
+            {
+                scoresList = FileToList(filePath);
+            }
+            scoresList.Add(new Score(score, "", DateTime.Now.ToString()));
+            File.WriteAllText(filePath, ListToFile(SortArray(scoresList)));
+        }
+
+        List<Score> SortArray(List<Score> list)
         {
             for (int s = 0; s < list.Count; s++)
             {
-                if (s + 1 < list.Count && list[s] > list[s + 1])
+                if (s + 1 < list.Count && list[s].Result > list[s + 1].Result)
                 {
                     var temporary = list[s];
                     list[s] = list[s + 1];
@@ -101,17 +127,7 @@ namespace GuessANumber
                     SortArray(list);
                 }
             }
-
-            string stringbuilder = "";
-
-            for (var i = 0; i < list.Count; i++)
-            {
-                stringbuilder += list[i].ToString();
-                Console.WriteLine("item: " + i);
-                Console.WriteLine("list count: " + list.Count);
-                if (i + 1 < list.Count) { stringbuilder += ",\n"; };
-            }
-            return stringbuilder;
+            return list;
         }
     }
 }
