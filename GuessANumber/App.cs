@@ -17,7 +17,8 @@ namespace GuessANumber
         {
             Console.WriteLine("Input 1 to play");
             Console.WriteLine("Input 2 to see highscore list");
-            Console.WriteLine("Input 3 to quit");
+            Console.WriteLine("Input 3 to change file directory");
+            Console.WriteLine("Input 4 to quit");
             string answer = Console.ReadLine();
 
             switch (answer)
@@ -32,11 +33,49 @@ namespace GuessANumber
                     Console.WriteLine();
                     break;
                 case "3":
+                    ChangeFileDirectory();
+                    break;
+                case "4":
                     Console.WriteLine("Thanks for playing!");
                     Environment.Exit(0);
                     break;
             }
             Run();
+        }
+
+        void ChangeFileDirectory()
+        {
+            Console.WriteLine("Enter an existing directory!");
+            Console.WriteLine("Input 'Back' to go to the main menu.");
+            string directory = Console.ReadLine();
+            string fileName;
+
+            if (directory.ToLower() == "back") { Run(); }
+
+            if (Directory.Exists(directory))
+            {
+                Console.WriteLine("Enter a file name:");
+                fileName = Console.ReadLine();
+                try
+                {
+                    File.WriteAllText(directory + "\\" + fileName + ".txt", "");
+                }
+                catch
+                {
+                    Console.WriteLine("Access denied to that directory, choose another one:");
+                    Console.WriteLine(new UnauthorizedAccessException());
+                    ChangeFileDirectory();
+                }
+
+                filePath = directory + "\\" + fileName + ".txt";
+                Console.WriteLine("Directory changed to:");
+                Console.WriteLine(filePath);
+            }
+            else
+            {
+                Console.WriteLine("You must enter a VALID directory that exists!");
+                ChangeFileDirectory();
+            }
         }
 
         void GuessANumber()
