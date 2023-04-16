@@ -94,10 +94,8 @@ namespace GuessANumber
             for (int i = 0; i < list.Count; i++)
             {
                 stringBuilder += "{\n   ";
-                stringBuilder += list[i].Result + ",\n   ";
-                stringBuilder += list[i].Name + ",\n   ";
-                stringBuilder += list[i].Time + "\n}";
-
+                stringBuilder += JsonSerializer.SerializeToDocument(new Score(list[i].Result, list[i].Name, list[i].Time));
+                stringBuilder += "\n}";
                 if (list.Count > 1 && i + 1 < list.Count) { stringBuilder += ",\n"; }
             }
             return stringBuilder;
