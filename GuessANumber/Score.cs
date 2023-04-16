@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GuessANumber
 {
-    class Score
+    public class Score
     {
         public int Result;
         public string Name;

@@ -12,9 +12,35 @@ namespace GuessANumber
 {
     public class App
     {
+        string filePath = "C:\\Users\\Matti\\OneDrive\\Skrivbord\\Highscore.txt";
         public void Run()
         {
-            string filePath = "C:\\Users\\Matti\\OneDrive\\Skrivbord\\Highscore.txt";
+            Console.WriteLine("Input 1 to play");
+            Console.WriteLine("Input 2 to see highscore list");
+            Console.WriteLine("Input 3 to quit");
+            string answer = Console.ReadLine();
+
+            switch (answer)
+            {
+                case "1":
+                    GuessANumber();
+                    break;
+                case "2":
+                    List<Score> list = FileToList(filePath);
+                    Console.WriteLine("Hgihscore list:");
+                    list.ForEach(x => Console.WriteLine($"Result: {x.Result}, Name: {x.Name}, Time: {x.Time}"));
+                    Console.WriteLine();
+                    break;
+                case "3":
+                    Console.WriteLine("Thanks for playing!");
+                    Environment.Exit(0);
+                    break;
+            }
+            Run();
+        }
+
+        void GuessANumber()
+        {
             int score = 0;
 
             int number = new Random().Next(1, 101);
@@ -40,20 +66,9 @@ namespace GuessANumber
 
                 else if (intAnswer == number)
                 {
-                    WriteToFile(filePath, score);
-
                     Console.WriteLine("Correct!");
-                    Console.WriteLine("Do you want to play again? (Y/N)");
-
-                    answer = Console.ReadLine().ToLower();
-
-                    if (answer == "n")
-                    {
-                        Console.WriteLine("Thanks for the play!");
-                        Environment.Exit(0);
-                    }
-
-                    if (answer == "y") { Run(); }
+                    WriteToFile(filePath, score);
+                    Run();
                 }
             }
         }
@@ -99,6 +114,26 @@ namespace GuessANumber
             return stringBuilder;
         }
 
+        string ReturnValidName()
+        {
+            Console.WriteLine("Enter your name below!");
+            string name = Console.ReadLine();
+            string[] forbiddenCharacters = { "{", ",", "}" };
+            List<string> forbiddenCharList = forbiddenCharacters.ToList();
+
+            forbiddenCharList.ForEach(x =>
+            {
+                if (name.Contains(x))
+                {
+                    Console.WriteLine("Name can not contain the following characters:");
+                    forbiddenCharList.ForEach(x => Console.WriteLine(x));
+                    ReturnValidName();
+                }
+            });
+
+            return name;
+        }
+
         void WriteToFile(string filePath, int score)
         {
             var scoresList = new List<Score>();
@@ -107,7 +142,14 @@ namespace GuessANumber
             {
                 scoresList = FileToList(filePath);
             }
-            scoresList.Add(new Score(score, "Test Name", DateTime.Now.ToString()));
+            if (scoresList.Count == 5 && score > scoresList[4].Result) { return; }
+
+            Console.WriteLine("Your score are amongst the top 5!");
+
+            if (scoresList.Count == 5) { scoresList.Remove(scoresList[4]); }
+
+            string name = ReturnValidName();
+            scoresList.Add(new Score(score, name, DateTime.Now.ToString()));
             File.WriteAllText(filePath, ListToFile(SortArray(scoresList)));
         }
 
