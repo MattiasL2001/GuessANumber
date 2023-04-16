@@ -63,26 +63,22 @@ namespace GuessANumber
             List<string> list;
             var scoreList = new List<Score>();
 
-            if (File.ReadAllLines(filePath).Contains("},{"))
-            {
-                list = File.ReadAllText(filePath).Split("},{").ToList();
-            }
-            else
-            {
-                list = File.ReadAllText(filePath).Split("}").ToList();
-            }
+            string content = File.ReadAllText(filePath);
+            content = content.Replace("},{", "");
+            content = content.Replace("}", "");
+            content = content.Replace("\n", "");
+            content = content.Replace("{", "");
+            content = content.Replace("   ", "");
+            content = content.Trim();
+            string[] elements = content.Split(",");
+            int objCount = elements.Length / 3;
 
-            foreach (var _score in list)
+            for (int i = 0; i < objCount; i++)
             {
-                if (_score != "")
-                {
-                    Console.WriteLine(_score.Split(",")[0].Replace("{", ""));
-                    int result = Convert.ToInt32(_score.Split(",")[0].Replace("{", "").Trim());
-                    string name = _score.Split(",")[1];
-                    string time = _score.Split(",")[2];
-                    var scoreObj = new Score(result, name, time);
-                    scoreList.Add(scoreObj);
-                }
+                int result = Convert.ToInt32(elements[0 + i*3]);
+                string name = elements[1 + i*3];
+                string time = elements[2 + i*3];
+                scoreList.Add(new Score(result, name, time));
             }
 
             return scoreList;
@@ -91,7 +87,7 @@ namespace GuessANumber
         string ListToFile(List<Score> list)
         {
             var stringBuilder = "";
-            for (int i = 0; i < list.Count; i++)
+            for(var i = 0; i < list.Count; i++)
             {
                 stringBuilder += "{\n   ";
                 stringBuilder += list[i].Result + ",\n   ";
@@ -111,7 +107,7 @@ namespace GuessANumber
             {
                 scoresList = FileToList(filePath);
             }
-            scoresList.Add(new Score(score, "", DateTime.Now.ToString()));
+            scoresList.Add(new Score(score, "Test Name", DateTime.Now.ToString()));
             File.WriteAllText(filePath, ListToFile(SortArray(scoresList)));
         }
 
