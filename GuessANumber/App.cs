@@ -153,10 +153,9 @@ namespace GuessANumber
             return stringBuilder;
         }
 
-        string ReturnValidName()
+        bool IsNameValid(string name)
         {
-            Console.WriteLine("Enter your name below!");
-            string name = Console.ReadLine();
+            bool isNameValid = true;
             string[] forbiddenCharacters = { "{", ",", "}" };
             List<string> forbiddenCharList = forbiddenCharacters.ToList();
 
@@ -166,12 +165,11 @@ namespace GuessANumber
                 {
                     Console.WriteLine("Name can not contain the following characters:");
                     forbiddenCharList.ForEach(x => Console.WriteLine(x));
-                    ReturnValidName();
-                    return;
+                    isNameValid = false;
                 }
             });
 
-            return name;
+            return isNameValid;
         }
 
         void WriteToFile(string filePath, int score)
@@ -188,7 +186,13 @@ namespace GuessANumber
 
             if (scoresList.Count == 5) { scoresList.Remove(scoresList[4]); }
 
-            string name = ReturnValidName();
+            string name = "";
+            while(true)
+            {
+                Console.WriteLine("Enter your name below!");
+                name = Console.ReadLine();
+                if (IsNameValid(name)) { break; }
+            }
             scoresList.Add(new Score(score, name, DateTime.Now.ToString()));
             File.WriteAllText(filePath, ListToFile(SortArray(scoresList)));
         }
