@@ -167,6 +167,7 @@ namespace GuessANumber
                     Console.WriteLine("Name can not contain the following characters:");
                     forbiddenCharList.ForEach(x => Console.WriteLine(x));
                     ReturnValidName();
+                    return;
                 }
             });
 
